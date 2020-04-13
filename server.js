@@ -1,38 +1,37 @@
-const express = require('express');
-const { execute, subscribe } = require('graphql');
-const { createServer } = require('http');
-const express_graphql = require('express-graphql');
-const { SubscriptionServer } = require('subscriptions-transport-ws');
+const express = require('express')
+const bodyParser = require('body-parser')
+const { createServer } = require('http')
+const { execute, subscribe } = require('graphql')
+const { SubscriptionServer } = require('subscriptions-transport-ws')
+const { graphqlExpress, graphiqlExpress } = require('apollo-server-express')
 
 const schema = require('./src/graphql/schema');
 
 const PORT = 3333;
-const WS_BASE_URI = `ws://localhost:${PORT}`;
+const WS_BASE_URI = `ws://localhost:${PORT}/subscriptions`;
 
 const app = express();
 
-app.use('/graphql',
-  express_graphql({
-    schema: schema,
-    graphiql: true,
-    subscriptionsEndpoint: WS_BASE_URI
-  })
-);
+app.use('/graphiql', graphiqlExpress({
+  endpointURL: '/graphql',
+  subscriptionsEndpoint: WS_BASE_URI
+}))
 
-const webServer = createServer(app);
+app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));
 
-webServer.listen(PORT, () => {
-  console.log(`GraphQL is now running on http://localhost:${PORT}`);
-  console.log(`Subscriptions are running on ${WS_BASE_URI}/subscriptions`);
+const server = createServer(app);
+
+server.listen(PORT, () => {
+  console.log("Server started listening on " + PORT);
   new SubscriptionServer(
     {
       execute,
       subscribe,
-      schema
+      schema: schema     
     },
     {
-      server: webServer,
-      path: '/subscriptions',
+      server: server,
+      path: '/subscriptions'
     }
   );
-});
+})
