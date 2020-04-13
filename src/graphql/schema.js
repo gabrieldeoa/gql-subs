@@ -1,40 +1,73 @@
-const graphQL = require('graphql');
-const { GraphQLObjectType, GraphQLSchema } = graphQL;
-const { queries, mutations, subscriptions } = require('./index');
+const { gql } = require('apollo-server');
+const search_hospital_bed = require('../actions/search_hospital_bed');
+const save_hospital_bed = require('../actions/save_hospital_bed');
+const socket = require('../../socket');
 
-const RootQuery = new GraphQLObjectType({
-  name: 'RootQueryType',
-  description: 'RootQueryType',
-  fields: () => {
-    return {
-      ...Object.assign({}, queries)
-    }
+const typeDefs = gql`
+  type HospitalBed {
+    id: Int
+    situacao: String
+    status: String
+    observacao: String
+    criado_em: String
+    alterado_em: String
   }
-})
 
-const RootMutation = new GraphQLObjectType({
-  name: 'RootMutationType',
-  description: 'RootMutationType',
-  fields: () => {
-    return {
-      ...Object.assign({}, mutations)
-    }
+  type Query {
+    hospitalBeds(
+      id: Int,
+      situacao: String,
+      status: Int,
+      observacao: String,
+      criado_em: String,
+      alterado_em: String
+    ): [HospitalBed]
   }
-})
 
-const RootSubscription = new GraphQLObjectType({
-  name: 'RootSubscription',
-  description: 'RootSubscription',
-  fields: () => {
-    return {
-      ...Object.assign({}, subscriptions)
-    }
+  type Subscription {
+    hospitalBedAdded(
+      id: Int,
+      situacao: String,
+      status: Int,
+      observacao: String,
+      criado_em: String,
+      alterado_em: String
+    ): HospitalBed
   }
-})
+
+  type Mutation {
+    addHospitalBed(
+      id: Int,
+      situacao: String,
+      status: Int,
+      observacao: String,
+      criado_em: String,
+      alterado_em: String,
+    ): HospitalBed
+  }
+`;
 
 
-module.exports = new GraphQLSchema({
-  query: RootQuery,
-  mutation: RootMutation,
-  subscription: RootSubscription
-})
+const resolvers = {
+  Query: {
+    hospitalBeds: (parent, args, context, info) =>  {
+      return search_hospital_bed(args);
+    }
+  },
+  Mutation: {
+    addHospitalBed: (parent, args, context, info) =>  {
+      socket.publish('hospitalBedAdded', { hospitalBedAdded: { ...args }})
+      return save_hospital_bed(args);
+    }
+  },
+  Subscription: {
+    hospitalBedAdded: {
+      subscribe: (payload) => socket.asyncIterator('hospitalBedAdded', payload)
+    }
+  },
+};
+
+module.exports = {
+  typeDefs,
+  resolvers
+}

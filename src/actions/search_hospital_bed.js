@@ -1,7 +1,7 @@
 const hospital_bed = require('../models/hospital_bed');
 const { Op } = require('sequelize');
 
-module.exports = (criterias) => {
+module.exports = async (criterias) => {
 
   let where = {}
 
@@ -25,8 +25,11 @@ module.exports = (criterias) => {
     }
   }
 
-  return hospital_bed.findAndCountAll({
+  const result = await hospital_bed.findAndCountAll({
     where,
     order: [['id', 'ASC']]
   });
+
+  
+  return result.rows
 };
