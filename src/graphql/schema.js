@@ -32,7 +32,7 @@ const typeDefs = gql`
       observacao: String,
       criado_em: String,
       alterado_em: String
-    ): HospitalBed
+    ): [HospitalBed]
   }
 
   type Mutation {
@@ -62,6 +62,10 @@ const resolvers = {
   },
   Subscription: {
     hospitalBedAdded: {
+      resolve: async() => {
+        const payload = await search_hospital_bed({})
+        return payload;
+      },
       subscribe: (payload) => socket.asyncIterator('hospitalBedAdded', payload)
     }
   },

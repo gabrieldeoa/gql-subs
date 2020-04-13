@@ -25,11 +25,11 @@ module.exports = async (criterias) => {
     }
   }
 
-  const result = await hospital_bed.findAndCountAll({
+  const result = await hospital_bed.findAll({
     where,
-    order: [['id', 'ASC']]
+    order: [['id', 'ASC']],
+    raw: true
   });
 
-  
-  return result.rows
+  return result
 };
