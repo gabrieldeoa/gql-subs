@@ -12,12 +12,14 @@ module.exports = {
     data: { type: hospital_bed_input_type, description: 'Informações de leito' },
   },
   resolve: async (value, args, d, e) => {
-    const result = await save_hospital_bed(args.data);
+
+    const  result = await save_hospital_bed(args.data);
 
     socket.publish('HOSPITAL_BED_CREATED', {
-      hospital_bed_subscription: result
+      hospital_bed_subscription: { result }
     })
 
     return result
+
   }
 }

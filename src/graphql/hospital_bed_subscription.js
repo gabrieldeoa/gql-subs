@@ -6,9 +6,11 @@ const search_hospital_bed = require('../actions/search_hospital_bed');
 
 module.exports = {
   type: result_type_factory('hospital_beds', hospital_bed_type),
-  subscribe: (payload) => socket.asyncIterator('HOSPITAL_BED_CREATED', payload),
   resolve: async (payload) => {
-    const result = await search_hospital_bed({});
-    return result
-  }
+
+    payload = await search_hospital_bed({});
+
+    return payload;
+  },
+  subscribe: (payload) => socket.asyncIterator('HOSPITAL_BED_CREATED', payload)
 }
