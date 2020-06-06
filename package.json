@@ -9,7 +9,7 @@
   "author": "Gabriel Araujo",
   "license": "ISC",
   "dependencies": {
-    "apollo-server-express": "1.3.4",
+    "apollo-server-express": "2.14.2",
     "apollo-server-module-graphiql": "1.3.4",
     "babel-cli": "^6.26.0",
     "body-parser": "^1.19.0",
